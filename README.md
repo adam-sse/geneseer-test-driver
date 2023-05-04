@@ -48,3 +48,26 @@ For debugging purposes, you can pass the system property `nowrap` to the JVM (i.
 arguments, *not* the command line arguments of this program). This will cause this test driver to not capture the stdout
 and stderr output of the test execution, so that it is printed normally. Also, the test failures are not written in
 serialized form to stdout; instead they are written in human-readable text form to stdout after all tests have finished.
+
+## Compiling
+
+This project uses [Maven](https://maven.apache.org/) for dependency management and the build process. To simply build
+jars, run:
+```
+mvn package
+```
+
+This creates two jar files in the `target` folder (`$version` is the version that was built, e.g. `1.0.0`
+or `1.0.1-SNAPSHOT`):
+
+* `geneseer-test-driver-$version.jar` just includes the class files of this program.
+* `geneseer-test-driver-$version-jar-with-dependencies.jar` includes the class files of this program, plus all
+dependencies. This means that this jar can be used when you don't want to manually provide all dependencies of this
+program each time you execute it.
+
+When other projects require this project as a dependency in Maven, you need to install it to the local Maven repository.
+They usually require a specific version, so you need to check that out first (using `1.0.0` in this example). Run:
+```
+git checkout v1.0.0
+mvn install
+``` 
