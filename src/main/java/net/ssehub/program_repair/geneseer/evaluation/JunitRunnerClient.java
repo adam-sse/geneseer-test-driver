@@ -69,6 +69,8 @@ public class JunitRunnerClient {
                 }
             }
         }
+        
+        System.exit(0);
     }
 
 }
