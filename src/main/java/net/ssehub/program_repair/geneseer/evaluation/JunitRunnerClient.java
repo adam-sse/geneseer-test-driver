@@ -65,7 +65,7 @@ public class JunitRunnerClient {
             } else {
                 System.out.println(testFailures.size() + " test failures");
                 for (TestFailure failure : testFailures) {
-                    System.out.println(failure + " (" + failure.getMessage() + ")");
+                    System.out.println(failure + " " + failure.getStacktrace());
                 }
             }
         }
