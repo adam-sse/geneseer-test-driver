@@ -6,13 +6,13 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
-import org.junit.runner.JUnitCore;
-
-public class JunitRunnerClient {
+public abstract class AbstractRunner {
 
     private static boolean noWrap = System.getProperty("nowrap") != null;
     
-    public static void main(String[] args) throws IOException {
+    protected abstract List<TestResult> runTests(String[] args);
+    
+    public final void run(String[] args) throws IOException {
         ObjectOutputStream stdout = null;
         
         ByteArrayOutputStream capturedStdout = new ByteArrayOutputStream();
@@ -28,20 +28,7 @@ public class JunitRunnerClient {
         List<TestResult> result = null;
         
         try {
-            Class<?>[] classes = new Class<?>[args.length];
-            for (int i = 0; i < args.length; i++) {
-                try {
-                    classes[i] = Class.forName(args[i]);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            JUnitCore junit = new JUnitCore();
-            TestResultCollector testResultCollector = new TestResultCollector();
-            junit.addListener(testResultCollector);
-            junit.run(classes);
-            result = testResultCollector.getTestResults();
+            result = runTests(args);
             
         } finally {
             capturedStdout.flush();
@@ -74,5 +61,5 @@ public class JunitRunnerClient {
         
         System.exit(0);
     }
-
+    
 }

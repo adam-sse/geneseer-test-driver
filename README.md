@@ -10,15 +10,27 @@ the classes containing the test cases, and any libraries required. If the `jar-w
 used, Junit does not need to be included in the classpath as it is already included in the fat jar. Otherwise, include
 Junit 4 in the classpath (even if you want to execute Junit 3.8.x tests).
 
-The main class of this test driver is `net.ssehub.program_repair.geneseer.evaluation.JunitRunnerClient`. The command
-line arguments are fully qualified class names of the test classes. They are loaded via
+There are two main classes, one for running a whole suite of test classes, and one for running only a single test
+method (useful when collecting coverage for a single test method):
+
+* `net.ssehub.program_repair.geneseer.evaluation.ClassListRunner` runs a set of test classes. The command line arguments
+are fully qualified class names of the the test classes to run. They are loaded via
 [`Class.forName()`](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName%28java.lang.String%29). If
 loading a class fails, a stacktrace is written to the error output string (see below) and execution continues with the
 next class.
+* `net.ssehub.program_repair.geneseer.evaluation.SingleTestMethodRunner` runs a single test method. The first command
+line argument is the fully qualified class name of the test class. It is loaded via
+[`Class.forName()`](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName%28java.lang.String%29). If
+loading a class fails, a stacktrace is written to the error output string (see below) and no tests are executed. The
+second command line argument is the name of the test method (no parenthesis or arguments). 
 
-An example invocation may look like this (using the Unix file separator character `:`):
+Here are example invocations (using the Unix file separator character `:`). To run all tests in two given classes:
 ```
-java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.JunitRunnerClient some.TestClass other.TestClass
+java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.ClassListRunner some.TestClass other.TestClass
+```
+To run only a single test method:
+```
+java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.SingleTestMethodRunner some.TestClass methodName
 ```
 
 This program is compiled with Java 7, so that it works on that and any later versions.
