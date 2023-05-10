@@ -31,23 +31,24 @@ driver. The serialized output is:
 
 1. The captured stdout as `java.lang.String`
 2. The captured stderr as `java.lang.String`
-3. The failed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestFailure>`
+3. The executed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
 
-Note that you do not need to depend on this project to deserialize the `TestFailure` class. It is possible to create a
+Note that you do not need to depend on this project to deserialize the `TestResult` class. It is possible to create a
 structurally equivalent class and deserialize into that. This requires:
 
-* A class or record called `TestFailure` in the package `net.ssehub.program_repair.geneseer.evaluation`
-* The serial version identifier `private static final long serialVersionUID = 349718598568296233L`
+* A class or record called `TestResult` in the package `net.ssehub.program_repair.geneseer.evaluation`
+* The serial version identifier `private static final long serialVersionUID = 5281136086896771809L`
 * The following attributes, all of type `java.lang.String`
     * `testClass`
     * `testMethod`
-    * `message`
-    * `stacktrace`
+    * `failureMessage`
+    * `failureStacktrace`
 
 For debugging purposes, you can pass the system property `nowrap` to the JVM (i.e. `-Dnowrap` added to the JVM
 arguments, *not* the command line arguments of this program). This will cause this test driver to not capture the stdout
-and stderr output of the test execution, so that it is printed normally. Also, the test failures are not written in
-serialized form to stdout; instead they are written in human-readable text form to stdout after all tests have finished.
+and stderr output of the test execution, so that it is printed normally. Also, the test results are not written in
+serialized form to stdout; instead, failed tests are written in human-readable text form to stdout after all tests have
+finished.
 
 ## Compiling
 

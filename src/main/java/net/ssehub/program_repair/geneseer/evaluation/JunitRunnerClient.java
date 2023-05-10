@@ -4,12 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
 
 public class JunitRunnerClient {
 
@@ -28,7 +25,7 @@ public class JunitRunnerClient {
             System.setErr(new PrintStream(capturedStderr));
         }
         
-        Result result = null;
+        List<TestResult> result = null;
         
         try {
             Class<?>[] classes = new Class<?>[args.length];
@@ -41,7 +38,10 @@ public class JunitRunnerClient {
             }
             
             JUnitCore junit = new JUnitCore();
-            result = junit.run(classes);
+            TestResultCollector testResultCollector = new TestResultCollector();
+            junit.addListener(testResultCollector);
+            junit.run(classes);
+            result = testResultCollector.getTestResults();
             
         } finally {
             capturedStdout.flush();
@@ -52,21 +52,23 @@ public class JunitRunnerClient {
                 stdout.writeObject(capturedStderr.toString());
             }
             
-            List<TestFailure> testFailures = new ArrayList<>(result != null ? result.getFailureCount() : 0);
-            if (result != null) {
-                for (Failure failure : result.getFailures()) {
-                    testFailures.add(new TestFailure(failure));
-                }
-            }
-            
             if (!noWrap) {
-                stdout.writeObject(testFailures);
+                stdout.writeObject(result);
                 stdout.flush();
             } else {
-                System.out.println(testFailures.size() + " test failures");
-                for (TestFailure failure : testFailures) {
-                    System.out.println(failure + " " + failure.getStacktrace());
+                
+                System.out.println(result.size() + " tests executed");
+                int numFailed = 0;
+                StringBuilder failures = new StringBuilder();
+                for (TestResult test : result) {
+                    if (test.isFailure()) {
+                        numFailed++;
+                        failures.append(test).append(' ').append(test.getFailureStacktrace()).append('\n');
+                    }
                 }
+                
+                System.out.println(numFailed + " test failures");
+                System.out.println(failures.toString());
             }
         }
         
