@@ -66,7 +66,7 @@ dependencies. This means that this jar can be used when you don't want to manual
 program each time you execute it.
 
 When other projects require this project as a dependency in Maven, you need to install it to the local Maven repository.
-They usually require a specific version, so you need to check that out first (using `1.0.0` in this example). Run:
+They usually require a specific version, so you need to check that out first (using `2.0.0` in this example). Run:
 ```
 git checkout v2.0.0
 mvn install
