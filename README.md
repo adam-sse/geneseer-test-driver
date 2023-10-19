@@ -25,7 +25,7 @@ This program reads Java serialized commands from stdin. Commands are a single `j
 following. The results are written via Java serialization to stdout. The normal stdout and stderr output of the test
 execution are suppressed.
 
-There are two commands available:
+There are three commands available:
 
 * `"CLASS"`: another `java.lang.String` after this command specifies the fully qualified class name of a test class to
 run. The are loaded via
@@ -38,6 +38,9 @@ name of a test method within that class (no parenthesis or arguments). The resul
 `net.ssehub.program_repair.geneseer.evaluation.TestResult` of the executed test, or `null` if either the class could
 not be loaded (see above) or the test method does not exist within that class.
 
+* `"HEARTBEAT"`: The result of this command is a single `java.lang.String` with the content `"alive"`. This is useful
+for checking if the process is still responding (e.g. during debugging).
+
 Note that you do not need to depend on this project to deserialize the `TestResult` class. It is possible to create a
 structurally equivalent class and deserialize into that. This requires:
 
@@ -48,6 +51,13 @@ structurally equivalent class and deserialize into that. This requires:
     * `testMethod`
     * `failureMessage`
     * `failureStacktrace`
+
+## Debug Output
+
+The runner can print log debug output to stderr. To enable this, pass `debug` (case insensitive) as the first command
+line argument (i.e. after the fully qualified class name of the main class
+`net.ssehub.program_repair.geneseer.evaluation.Runner`). The runner will then print what it's currently doing to stderr.
+This is meant for human consumption and  should not be parsed.
 
 ## Compiling
 
