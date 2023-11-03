@@ -19,7 +19,7 @@ public class Runner {
     
     private static void debugMsg(String message) {
         if (debug) {
-            stderr.println(message);
+            stderr.println("[geneseer-test-driver] " + message);
         }
     }
     
@@ -78,16 +78,18 @@ public class Runner {
         ObjectInputStream in = new ObjectInputStream(System.in);
         stderr = System.err;
         debug = args.length > 0 && args[0].equalsIgnoreCase("DEBUG");
-        debugMsg("Debug output enabled");
-        
-        System.setOut(new PrintStream(new DiscardingOutputStream()));
-        System.setErr(new PrintStream(new DiscardingOutputStream()));
-        System.setIn(new EmptyInputStream());
         
         if (debug) {
+            debugMsg("Debug output enabled");
             Runtime.getRuntime().addShutdownHook(new ShutdownHook());
             Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+            System.setOut(System.err);
+            
+        } else {
+            System.setOut(new PrintStream(new DiscardingOutputStream()));
+            System.setErr(new PrintStream(new DiscardingOutputStream()));
         }
+        System.setIn(new EmptyInputStream());
         
         while (true) {
             debugMsg("Waiting for command...");
