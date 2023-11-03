@@ -115,13 +115,15 @@ public class TestDriver {
 
         @Override
         public void uncaughtException(Thread thread, Throwable exception) {
-            stderr.print("[geneseer-test-driver] Exception in thread \"" + thread.getName() + "\" ");
-            exception.printStackTrace(stderr);
-            stderr.flush();
-            
-            if (!debug) {
-                System.err.print("Exception in thread \"" + thread.getName() + "\" ");
-                exception.printStackTrace(System.err);
+            if (!(exception instanceof ThreadDeath)) {
+                stderr.print("[geneseer-test-driver] Exception in thread \"" + thread.getName() + "\" ");
+                exception.printStackTrace(stderr);
+                stderr.flush();
+                
+                if (!debug) {
+                    System.err.print("Exception in thread \"" + thread.getName() + "\" ");
+                    exception.printStackTrace(System.err);
+                }
             }
         }
         
