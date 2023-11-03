@@ -62,13 +62,15 @@ public class Runner {
             debugMsg("ClassNotFoundException: " + e.getMessage());
         }
         
+        TestResult result;
         if (testResultCollector.getTestResults().size() != 1) {
             debugMsg("Got no TestResult");
-            return null;
+            result = null;
         } else {
             debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
-            return testResultCollector.getTestResults().get(0);
+            result = testResultCollector.getTestResults().get(0);
         }
+        return result;
     }
     
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -107,6 +109,10 @@ public class Runner {
                 out.writeObject("alive");
                 out.flush();
                 break;
+                
+            default:
+                debugMsg("Ignoring unknown command");
+                break;
             }
         }
     }
@@ -114,9 +120,9 @@ public class Runner {
     private static final class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
 
         @Override
-        public void uncaughtException(Thread t, Throwable e) {
-            debugMsg("Uncaught exception in thread " + t.getName());
-            e.printStackTrace(stderr);
+        public void uncaughtException(Thread thread, Throwable exception) {
+            debugMsg("Uncaught exception in thread " + thread.getName());
+            exception.printStackTrace(stderr);
         }
         
     }
@@ -133,15 +139,15 @@ public class Runner {
     private static final class DiscardingOutputStream extends OutputStream {
         
         @Override
-        public void write(int b) throws IOException {
+        public void write(int singleByte) throws IOException {
         }
         
         @Override
-        public void write(byte[] b, int off, int len) throws IOException {
+        public void write(byte[] bytes, int off, int len) throws IOException {
         }
 
         @Override
-        public void write(byte[] b) throws IOException {
+        public void write(byte[] bytes) throws IOException {
         }
         
     }
@@ -154,12 +160,12 @@ public class Runner {
         }
         
         @Override
-        public int read(byte[] b) throws IOException {
+        public int read(byte[] bytes) throws IOException {
             return -1;
         }
         
         @Override
-        public int read(byte[] b, int off, int len) throws IOException {
+        public int read(byte[] bytes, int off, int len) throws IOException {
             return -1;
         }
         
@@ -169,7 +175,7 @@ public class Runner {
         }
         
         @Override
-        public int readNBytes(byte[] b, int off, int len) throws IOException {
+        public int readNBytes(byte[] bytes, int off, int len) throws IOException {
             return 0;
         }
         
