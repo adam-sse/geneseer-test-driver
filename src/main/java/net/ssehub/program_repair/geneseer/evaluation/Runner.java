@@ -1,5 +1,6 @@
 package net.ssehub.program_repair.geneseer.evaluation;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -91,31 +92,35 @@ public class Runner {
         }
         System.setIn(new EmptyInputStream());
         
-        while (true) {
-            debugMsg("Waiting for command...");
-            String command = (String) in.readObject();
-            debugMsg("Received command: " + command);
-            switch (command) {
-            case "CLASS":
-                out.writeObject(runClass((String) in.readObject()));
-                out.flush();
-                break;
-                
-            case "METHOD":
-                out.writeObject(runMethod((String) in.readObject(), (String) in.readObject()));
-                out.flush();
-                break;
-                
-            case "HEARTBEAT":
-                debugMsg("Answering heartbeat with \"alive\"");
-                out.writeObject("alive");
-                out.flush();
-                break;
-                
-            default:
-                debugMsg("Ignoring unknown command");
-                break;
+        try {
+            while (true) {
+                debugMsg("Waiting for command...");
+                String command = (String) in.readObject();
+                debugMsg("Received command: " + command);
+                switch (command) {
+                case "CLASS":
+                    out.writeObject(runClass((String) in.readObject()));
+                    out.flush();
+                    break;
+                    
+                case "METHOD":
+                    out.writeObject(runMethod((String) in.readObject(), (String) in.readObject()));
+                    out.flush();
+                    break;
+                    
+                case "HEARTBEAT":
+                    debugMsg("Answering heartbeat with \"alive\"");
+                    out.writeObject("alive");
+                    out.flush();
+                    break;
+                    
+                default:
+                    debugMsg("Ignoring unknown command");
+                    break;
+                }
             }
+        } catch (EOFException e) {
+            debugMsg("stdin closed, stopping...");
         }
     }
     
