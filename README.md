@@ -28,15 +28,15 @@ execution are suppressed.
 There are three commands available:
 
 * `"CLASS"`: another `java.lang.String` after this command specifies the fully qualified class name of a test class to
-run. The are loaded via
+run. The class is loaded via
 [`Class.forName()`](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName%28java.lang.String%29). If
-loading a class fails, no tests are executed. The result of this command are the executed tests as
-`java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
+loading a class fails, the test driver process prints an exception to stderr and dies. The result of this command are
+the executed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
 
 * `"METHOD"`: two `java.lang.String` after this command specify the fully qualified class name of a test class and the
 name of a test method within that class (no parenthesis or arguments). The result of this command is either a
-`net.ssehub.program_repair.geneseer.evaluation.TestResult` of the executed test, or `null` if either the class could
-not be loaded (see above) or the test method does not exist within that class.
+`net.ssehub.program_repair.geneseer.evaluation.TestResult` of the executed test, or `null` if the test method does not
+exist within that class. If loading the class fails, the test driver process dies (see above).
 
 * `"HEARTBEAT"`: The result of this command is a single `java.lang.String` with the content `"alive"`. This is useful
 for checking if the process is still responding (e.g. during debugging).
@@ -58,7 +58,7 @@ The test driver can print log debug output to stderr. To enable this, pass `debu
 command line argument (i.e. after the fully qualified class name of the main class
 `net.ssehub.program_repair.geneseer.evaluation.TestDriver`). The test driver will then print what it's currently doing
 to stderr. This is meant for human consumption and  should not be parsed. Additionally, the stdout and stderr of the
-test cases being run in printed to stderr.
+test cases being run are printed to stderr.
 
 ## Compiling
 

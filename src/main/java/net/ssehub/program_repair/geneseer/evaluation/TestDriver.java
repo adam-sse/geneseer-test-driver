@@ -21,47 +21,34 @@ public class TestDriver {
     private static void debugMsg(String message) {
         if (debug) {
             stderr.println("[geneseer-test-driver] " + message);
+            stderr.flush();
         }
     }
     
-    private static List<TestResult> runClass(String className) {
+    private static List<TestResult> runClass(String className) throws ClassNotFoundException {
         TestResultCollector testResultCollector = new TestResultCollector();
 
         debugMsg("Running all tests in class" + className);
-        try {
-            Class<?> testClass = Class.forName(className);
-            
-            JUnitCore junit = new JUnitCore();
-            junit.addListener(testResultCollector);
-            
-            junit.run(testClass);
-            
-            
-        } catch (ClassNotFoundException e) {
-            // ignore
-            debugMsg("ClassNotFoundException: " + e.getMessage());
-        }
+        Class<?> testClass = Class.forName(className);
+        
+        JUnitCore junit = new JUnitCore();
+        junit.addListener(testResultCollector);
+        junit.run(testClass);
         
         debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
         return testResultCollector.getTestResults();
     }
     
-    private static TestResult runMethod(String className, String methodName) {
+    private static TestResult runMethod(String className, String methodName) throws ClassNotFoundException {
         TestResultCollector testResultCollector = new TestResultCollector();
 
         debugMsg("Running method " + methodName + " in class" + className);
-        try {
-            Class<?> testclass = Class.forName(className);
-            Request request = Request.method(testclass, methodName);
-            
-            JUnitCore junit = new JUnitCore();
-            junit.addListener(testResultCollector);
-            junit.run(request);
-            
-        } catch (ClassNotFoundException e) {
-            // ignore
-            debugMsg("ClassNotFoundException: " + e.getMessage());
-        }
+        Class<?> testclass = Class.forName(className);
+        Request request = Request.method(testclass, methodName);
+        
+        JUnitCore junit = new JUnitCore();
+        junit.addListener(testResultCollector);
+        junit.run(request);
         
         TestResult result;
         if (testResultCollector.getTestResults().size() != 1) {
@@ -78,19 +65,19 @@ public class TestDriver {
         ObjectOutputStream out = new ObjectOutputStream(System.out);
         ObjectInputStream in = new ObjectInputStream(System.in);
         stderr = System.err;
-        debug = args.length > 0 && args[0].equalsIgnoreCase("DEBUG");
         
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
+        System.setIn(new EmptyInputStream());
+        System.setOut(new PrintStream(new DiscardingOutputStream()));
+        System.setErr(new PrintStream(new DiscardingOutputStream()));
+        
+        debug = args.length > 0 && args[0].equalsIgnoreCase("DEBUG");
         if (debug) {
             debugMsg("Debug output enabled");
             Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
-            System.setOut(System.err);
-            
-        } else {
-            System.setOut(new PrintStream(new DiscardingOutputStream()));
-            System.setErr(new PrintStream(new DiscardingOutputStream()));
+            System.setOut(stderr);
+            System.setErr(stderr);
         }
-        System.setIn(new EmptyInputStream());
         
         try {
             while (true) {
@@ -128,8 +115,9 @@ public class TestDriver {
 
         @Override
         public void uncaughtException(Thread thread, Throwable exception) {
-            debugMsg("Uncaught exception in thread " + thread.getName());
+            stderr.print("[geneseer-test-driver] Uncaught exception in thread " + thread.getName() + ": ");
             exception.printStackTrace(stderr);
+            stderr.flush();
         }
         
     }
