@@ -10,11 +10,11 @@ the classes containing the test cases, and any libraries required. If the `jar-w
 used, Junit does not need to be included in the classpath as it is already included in the fat jar. Otherwise, include
 Junit 4 in the classpath (even if you want to execute Junit 3.8.x tests).
 
-The main class is `net.ssehub.program_repair.geneseer.evaluation.Runner`.
+The main class is `net.ssehub.program_repair.geneseer.evaluation.TestDriver`.
 
 Here are example invocations (using the Unix file separator character `:`):
 ```
-java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.Runner
+java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.TestDriver
 ```
 
 This program is compiled with Java 7, so that it works on that and any later versions.
@@ -54,10 +54,11 @@ structurally equivalent class and deserialize into that. This requires:
 
 ## Debug Output
 
-The runner can print log debug output to stderr. To enable this, pass `debug` (case insensitive) as the first command
-line argument (i.e. after the fully qualified class name of the main class
-`net.ssehub.program_repair.geneseer.evaluation.Runner`). The runner will then print what it's currently doing to stderr.
-This is meant for human consumption and  should not be parsed.
+The test driver can print log debug output to stderr. To enable this, pass `debug` (case insensitive) as the first
+command line argument (i.e. after the fully qualified class name of the main class
+`net.ssehub.program_repair.geneseer.evaluation.TestDriver`). The test driver will then print what it's currently doing
+to stderr. This is meant for human consumption and  should not be parsed. Additionally, the stdout and stderr of the
+test cases being run in printed to stderr.
 
 ## Compiling
 

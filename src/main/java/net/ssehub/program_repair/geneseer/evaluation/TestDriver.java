@@ -12,7 +12,7 @@ import java.util.List;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 
-public class Runner {
+public class TestDriver {
 
     private static boolean debug;
     
