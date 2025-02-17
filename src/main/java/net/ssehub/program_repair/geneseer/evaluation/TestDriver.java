@@ -28,7 +28,7 @@ public class TestDriver {
     private static List<TestResult> runClass(String className) throws ClassNotFoundException {
         TestResultCollector testResultCollector = new TestResultCollector();
 
-        debugMsg("Running all tests in class" + className);
+        debugMsg("Running all tests in class " + className);
         Class<?> testClass = Class.forName(className);
         
         JUnitCore junit = new JUnitCore();
@@ -42,7 +42,7 @@ public class TestDriver {
     private static TestResult runMethod(String className, String methodName) throws ClassNotFoundException {
         TestResultCollector testResultCollector = new TestResultCollector();
 
-        debugMsg("Running method " + methodName + " in class" + className);
+        debugMsg("Running method " + methodName + " in class " + className);
         Class<?> testclass = Class.forName(className);
         Request request = Request.method(testclass, methodName);
         
@@ -52,10 +52,10 @@ public class TestDriver {
         
         TestResult result;
         if (testResultCollector.getTestResults().size() != 1) {
-            debugMsg("Got no TestResult");
+            debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults, expected 1");
             result = null;
         } else {
-            debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
+            debugMsg("Got 1 TestResult");
             result = testResultCollector.getTestResults().get(0);
         }
         return result;
