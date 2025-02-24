@@ -66,7 +66,6 @@ public class TestDriver {
         ObjectInputStream in = new ObjectInputStream(System.in);
         stderr = System.err;
         
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
         System.setIn(new EmptyInputStream());
         System.setOut(new PrintStream(new DiscardingOutputStream()));
         System.setErr(new PrintStream(new DiscardingOutputStream()));
@@ -109,24 +108,6 @@ public class TestDriver {
         } catch (EOFException e) {
             debugMsg("stdin closed, stopping...");
         }
-    }
-    
-    private static final class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
-
-        @Override
-        public void uncaughtException(Thread thread, Throwable exception) {
-            if (!(exception instanceof ThreadDeath)) {
-                stderr.print("[geneseer-test-driver] Exception in thread \"" + thread.getName() + "\" ");
-                exception.printStackTrace(stderr);
-                stderr.flush();
-                
-                if (!debug) {
-                    System.err.print("Exception in thread \"" + thread.getName() + "\" ");
-                    exception.printStackTrace(System.err);
-                }
-            }
-        }
-        
     }
     
     private static final class ShutdownHook extends Thread {
