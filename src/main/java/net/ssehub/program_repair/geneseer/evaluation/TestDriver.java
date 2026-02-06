@@ -152,21 +152,6 @@ public class TestDriver {
             return -1;
         }
         
-        @Override
-        public byte[] readAllBytes() throws IOException {
-            return new byte[0];
-        }
-        
-        @Override
-        public int readNBytes(byte[] bytes, int off, int len) throws IOException {
-            return 0;
-        }
-        
-        @Override
-        public byte[] readNBytes(int len) throws IOException {
-            return new byte[0];
-        }
-        
     }
     
 }

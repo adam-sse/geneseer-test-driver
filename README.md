@@ -17,7 +17,7 @@ Here are example invocations (using the Unix file separator character `:`):
 java -cp geneseer-test-driver-jar-with-dependencies.jar:path/to/sut/classes/:path/to/test/classes/:path/to/lib.jar net.ssehub.program_repair.geneseer.evaluation.TestDriver
 ```
 
-This program is compiled with Java 7, so that it works on that and any later versions.
+This program is compiled with Java 8, so that it works on that and any later versions.
 
 ## Input & Output
 
@@ -29,7 +29,7 @@ There are three commands available:
 
 * `"CLASS"`: another `java.lang.String` after this command specifies the fully qualified class name of a test class to
 run. The class is loaded via
-[`Class.forName()`](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName%28java.lang.String%29). If
+[`Class.forName()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#forName-java.lang.String-). If
 loading a class fails, the test driver process prints an exception to stderr and dies. The result of this command are
 the executed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
 
@@ -68,8 +68,8 @@ jars, run:
 mvn package
 ```
 
-This creates two jar files in the `target` folder (`$version` is the version that was built, e.g. `2.0.0`
-or `1.2.1-SNAPSHOT`):
+This creates two jar files in the `target` folder (`$version` is the version that was built, e.g. `2.2.4`
+or `2.2.5-SNAPSHOT`):
 
 * `geneseer-test-driver-$version.jar` just includes the class files of this program.
 * `geneseer-test-driver-$version-jar-with-dependencies.jar` includes the class files of this program, plus all
@@ -77,8 +77,8 @@ dependencies. This means that this jar can be used when you don't want to manual
 program each time you execute it.
 
 When other projects require this project as a dependency in Maven, you need to install it to the local Maven repository.
-They usually require a specific version, so you need to check that out first (using `2.0.0` in this example). Run:
+They usually require a specific version, so you need to check that out first (using `2.2.4` in this example). Run:
 ```
-git checkout v2.0.0
+git checkout v2.2.4
 mvn install
 ``` 
