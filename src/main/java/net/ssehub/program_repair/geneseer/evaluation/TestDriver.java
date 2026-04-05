@@ -107,6 +107,7 @@ public class TestDriver {
             }
         } catch (EOFException e) {
             debugMsg("stdin closed, stopping...");
+            System.exit(0);
         }
     }
     
