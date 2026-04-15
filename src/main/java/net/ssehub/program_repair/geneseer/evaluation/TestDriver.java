@@ -10,7 +10,6 @@ import java.io.PrintStream;
 import java.util.List;
 
 import org.junit.runner.JUnitCore;
-import org.junit.runner.Request;
 
 public class TestDriver {
 
@@ -28,7 +27,7 @@ public class TestDriver {
     private static List<TestResult> runClass(String className) throws ClassNotFoundException {
         TestResultCollector testResultCollector = new TestResultCollector();
 
-        debugMsg("Running all tests in class " + className);
+        debugMsg("Running test class " + className);
         Class<?> testClass = Class.forName(className);
         
         JUnitCore junit = new JUnitCore();
@@ -39,26 +38,22 @@ public class TestDriver {
         return testResultCollector.getTestResults();
     }
     
-    private static TestResult runMethod(String className, String methodName) throws ClassNotFoundException {
+    private static List<TestResult> runMethodsReportingIndividually(String className, ObjectInputStream in,
+            ObjectOutputStream out) throws ClassNotFoundException {
+        
         TestResultCollector testResultCollector = new TestResultCollector();
+        TestFinishReporter testFinishReporter = new TestFinishReporter(in, out);
 
-        debugMsg("Running method " + methodName + " in class " + className);
+        debugMsg("Running methods in test class " + className + ", reporting finished tests individually");
         Class<?> testclass = Class.forName(className);
-        Request request = Request.method(testclass, methodName);
         
         JUnitCore junit = new JUnitCore();
         junit.addListener(testResultCollector);
-        junit.run(request);
+        junit.addListener(testFinishReporter);
+        junit.run(testclass);
         
-        TestResult result;
-        if (testResultCollector.getTestResults().size() != 1) {
-            debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults, expected 1");
-            result = null;
-        } else {
-            debugMsg("Got 1 TestResult");
-            result = testResultCollector.getTestResults().get(0);
-        }
-        return result;
+        debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
+        return testResultCollector.getTestResults();
     }
     
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -89,8 +84,10 @@ public class TestDriver {
                     out.flush();
                     break;
                     
-                case "METHOD":
-                    out.writeObject(runMethod((String) in.readObject(), (String) in.readObject()));
+                case "METHODS":
+                    List<TestResult> resultList = runMethodsReportingIndividually((String) in.readObject(), in, out);
+                    out.writeObject("DONE");
+                    out.writeObject(resultList);
                     out.flush();
                     break;
                     

@@ -33,10 +33,13 @@ run. The class is loaded via
 loading a class fails, the test driver process prints an exception to stderr and dies. The result of this command are
 the executed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
 
-* `"METHOD"`: two `java.lang.String` after this command specify the fully qualified class name of a test class and the
-name of a test method within that class (no parenthesis or arguments). The result of this command is either a
-`net.ssehub.program_repair.geneseer.evaluation.TestResult` of the executed test, or `null` if the test method does not
-exist within that class. If loading the class fails, the test driver process dies (see above).
+* `"METHODS"`: same as `"CLASS"`, but after each test method, three `java.lang.String` are output:
+    1. the constant `"TEST_FINISHED"`
+    2. the name of the test class (as in a TestResult)
+    3. the name of the test method (as in a TestResult)
+The test driver then waits until a single `java.lang.String` with the value `"CONTINUE"` is supplied. The intention here
+is that coverage data for each individual test method can be collected. Finally, the constant `java.lang.String`
+`"DONE"` is output, before the list of `TestsResult`s as in the `"CLASS"` command above.
 
 * `"HEARTBEAT"`: The result of this command is a single `java.lang.String` with the content `"alive"`. This is useful
 for checking if the process is still responding (e.g. during debugging).
@@ -68,8 +71,8 @@ jars, run:
 mvn package
 ```
 
-This creates two jar files in the `target` folder (`$version` is the version that was built, e.g. `2.2.4`
-or `2.2.5-SNAPSHOT`):
+This creates two jar files in the `target` folder (`$version` is the version that was built, e.g. `3.0.0`
+or `3.1.0-SNAPSHOT`):
 
 * `geneseer-test-driver-$version.jar` just includes the class files of this program.
 * `geneseer-test-driver-$version-jar-with-dependencies.jar` includes the class files of this program, plus all
@@ -77,8 +80,8 @@ dependencies. This means that this jar can be used when you don't want to manual
 program each time you execute it.
 
 When other projects require this project as a dependency in Maven, you need to install it to the local Maven repository.
-They usually require a specific version, so you need to check that out first (using `2.2.4` in this example). Run:
+They usually require a specific version, so you need to check that out first (using `3.0.0` in this example). Run:
 ```
-git checkout v2.2.4
+git checkout v3.0.0
 mvn install
 ``` 
