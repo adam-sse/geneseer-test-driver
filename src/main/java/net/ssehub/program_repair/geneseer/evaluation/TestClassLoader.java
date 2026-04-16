@@ -10,7 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TestClassLoader extends URLClassLoader {
+class TestClassLoader extends URLClassLoader {
 
     static {
         ClassLoader.registerAsParallelCapable();

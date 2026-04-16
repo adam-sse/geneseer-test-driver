@@ -9,7 +9,7 @@ import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
-public class TestResultCollector extends RunListener {
+class TestResultCollector extends RunListener {
 
     private Map<Description, TestResult> executedTests;
     

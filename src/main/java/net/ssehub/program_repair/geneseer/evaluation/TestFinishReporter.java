@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 
-public class TestFinishReporter extends RunListener {
+class TestFinishReporter extends RunListener {
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
