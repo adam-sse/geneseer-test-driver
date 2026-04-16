@@ -24,33 +24,39 @@ public class TestDriver {
         }
     }
     
-    private static List<TestResult> runClass(String className) throws ClassNotFoundException {
-        TestResultCollector testResultCollector = new TestResultCollector();
-
+    private static List<TestResult> runClass(String className) throws ClassNotFoundException, IOException {
         debugMsg("Running test class " + className);
-        Class<?> testClass = Class.forName(className);
-        
-        JUnitCore junit = new JUnitCore();
-        junit.addListener(testResultCollector);
-        junit.run(testClass);
-        
-        debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
-        return testResultCollector.getTestResults();
+        return runTestClass(className, null);
     }
     
     private static List<TestResult> runMethodsReportingIndividually(String className, ObjectInputStream in,
-            ObjectOutputStream out) throws ClassNotFoundException {
+            ObjectOutputStream out) throws ClassNotFoundException, IOException {
         
-        TestResultCollector testResultCollector = new TestResultCollector();
-        TestFinishReporter testFinishReporter = new TestFinishReporter(in, out);
-
         debugMsg("Running methods in test class " + className + ", reporting finished tests individually");
-        Class<?> testclass = Class.forName(className);
+        TestFinishReporter testFinishReporter = new TestFinishReporter(in, out);
+        return runTestClass(className, testFinishReporter);
+    }
+    
+    private static List<TestResult> runTestClass(String className, TestFinishReporter testFinishReporter)
+            throws ClassNotFoundException, IOException {
+        TestResultCollector testResultCollector = new TestResultCollector();
         
-        JUnitCore junit = new JUnitCore();
-        junit.addListener(testResultCollector);
-        junit.addListener(testFinishReporter);
-        junit.run(testclass);
+        TestClassLoader loader = null;
+        try {
+            loader = new TestClassLoader();
+            Class<?> testClass = Class.forName(className, true, loader);
+            
+            JUnitCore junit = new JUnitCore();
+            junit.addListener(testResultCollector);
+            if (testFinishReporter != null) {
+                junit.addListener(testFinishReporter);
+            }
+            junit.run(testClass);
+        } finally {
+            if (loader != null) {
+                loader.close();
+            }
+        }
         
         debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
         return testResultCollector.getTestResults();
