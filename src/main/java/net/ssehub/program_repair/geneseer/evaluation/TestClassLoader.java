@@ -6,7 +6,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TestClassLoader extends URLClassLoader {
 
@@ -18,11 +20,31 @@ public class TestClassLoader extends URLClassLoader {
         "java.", "javax.", "sun.", "com.sun.", // JRE
         "org.junit.", "junit.", "org.hamcrest.", // JUnit
         "org.jacoco.agent.rt.", // JaCoCo
+        "org.mockito.", "net.bytebuddy.", "org.objenesis.", // Mockito (though not used by us, does not work when using
+                                                            // separate class loaders
         "net.ssehub.program_repair.geneseer.evaluation." // us
     };
     
+    private Set<String> loadedByUs;
+    private Set<String> delegatedToParent;
+    
     public TestClassLoader() throws IOException {
         super(getClassPathUrls(), TestClassLoader.class.getClassLoader());
+    }
+    
+    public void recordClassLoadsForDebug() {
+        this.loadedByUs = new LinkedHashSet<>();
+        this.delegatedToParent = new LinkedHashSet<>();
+    }
+    
+    @Override
+    public void close() throws IOException {
+        if (loadedByUs != null && delegatedToParent != null) {
+            TestDriver.debugMsg(getClass().getSimpleName() + " closed after test");
+            TestDriver.debugMsg("    loadedByUs: " + loadedByUs);
+            TestDriver.debugMsg("    delegatedToParent: " + delegatedToParent);
+        }
+        super.close();
     }
     
     private static URL[] getClassPathUrls() throws IOException {
@@ -41,14 +63,23 @@ public class TestClassLoader extends URLClassLoader {
         synchronized (getClassLoadingLock(name)) {
             Class<?> loaded = findLoadedClass(name);
             if (loaded == null) {
-                if (shouldLoadChildFirst(name)) {
+                if (!isSystemClass(name)) {
                     try {
                         loaded = findClass(name);
+                        if (loadedByUs != null) {
+                            loadedByUs.add(name);
+                        }
                     } catch (ClassNotFoundException e) {
                         loaded = super.loadClass(name, false);
+                        if (delegatedToParent != null) {
+                            delegatedToParent.add(name);
+                        }
                     }
                 } else {
                     loaded = super.loadClass(name, false);
+                    if (delegatedToParent != null) {
+                        delegatedToParent.add(name);
+                    }
                 }
             }
             if (resolve) {
@@ -63,6 +94,11 @@ public class TestClassLoader extends URLClassLoader {
         URL url = findResource(name);
         if (url == null) {
             url = super.getResource(name);
+            if (url != null && delegatedToParent != null) {
+                delegatedToParent.add(name);
+            }
+        } else if (loadedByUs != null) {
+            loadedByUs.add(name);
         }
         return url;
     }
@@ -84,7 +120,7 @@ public class TestClassLoader extends URLClassLoader {
         return java.util.Collections.enumeration(result);
     }
 
-    private boolean shouldLoadChildFirst(String name) {
+    private boolean isSystemClass(String name) {
         boolean systemClass = false;
         for (String prefix : SYSTEM_CLASS_PREFIXES) {
             if (name.startsWith(prefix)) {
@@ -92,7 +128,7 @@ public class TestClassLoader extends URLClassLoader {
                 break;
             }
         }
-        return !systemClass;
+        return systemClass;
     }
 
 }

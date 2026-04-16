@@ -1,14 +1,14 @@
 # geneseer-test-driver
 
 This is a utility program that is used by [geneseer](https://github.com/adam-sse/geneseer). Its purpose is to execute
-Junit 4 and 3.8.x tests and print the results via Java serialization to stdout.
+JUnit 4 and 3.8.x tests and print the results via Java serialization to stdout.
 
 ## Running
 
 Start a JVM with the classpath set up to execute the tests. This should include the classes of the system under test,
 the classes containing the test cases, and any libraries required. If the `jar-with-dependencies` of this test driver is
-used, Junit does not need to be included in the classpath as it is already included in the fat jar. Otherwise, include
-Junit 4 in the classpath (even if you want to execute Junit 3.8.x tests).
+used, JUnit does not need to be included in the classpath as it is already included in the fat jar. Otherwise, include
+JUnit 4 in the classpath (even if you want to execute JUnit 3.8.x tests).
 
 The main class is `net.ssehub.program_repair.geneseer.evaluation.TestDriver`.
 
@@ -28,10 +28,8 @@ execution are suppressed.
 There are three commands available:
 
 * `"CLASS"`: another `java.lang.String` after this command specifies the fully qualified class name of a test class to
-run. The class is loaded via
-[`Class.forName()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#forName-java.lang.String-). If
-loading a class fails, the test driver process prints an exception to stderr and dies. The result of this command are
-the executed tests as `java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
+run. The result of this command are the executed tests as
+`java.util.List<net.ssehub.program_repair.geneseer.evaluation.TestResult>`
 
 * `"METHODS"`: same as `"CLASS"`, but after each test method, three `java.lang.String` are output:
     1. the constant `"TEST_FINISHED"`
@@ -55,13 +53,26 @@ structurally equivalent class and deserialize into that. This requires:
     * `failureMessage`
     * `failureStacktrace`
 
+## Test class loading
+
+Test classes are loaded using a mechanism behaving similar to
+[`Class.forName()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#forName-java.lang.String-). This
+means that the classpath of this test driver process needs to include the test classes as well as any dependencies they
+require. If loading a class fails, the test driver process prints an exception to stderr and terminates.
+
+Some test suites benefit from isolating test classes via separate class loaders. This prevents leftover static
+initialization from carrying over between test classes. However, in some cases (e.g. with JDBC drivers) this causes
+problems because they rely on static initialization that must persist across the entire JVM.
+
+By default, a separate class loader is used per test class. This class loader still uses the full classpath of this test
+driver process, so discovers the same classes as a normal `Class.forName()` call. To disable this default behavior, pass
+`--no-per-test-classloader` as a command line argument.
+
 ## Debug Output
 
-The test driver can print log debug output to stderr. To enable this, pass `debug` (case insensitive) as the first
-command line argument (i.e. after the fully qualified class name of the main class
-`net.ssehub.program_repair.geneseer.evaluation.TestDriver`). The test driver will then print what it's currently doing
-to stderr. This is meant for human consumption and  should not be parsed. Additionally, the stdout and stderr of the
-test cases being run are printed to stderr.
+The test driver can print log debug output to stderr. To enable this, pass `--debug` as a command line argument. The
+test driver will then print what it's currently doing to stderr. This is meant for human consumption and should not be
+parsed. Additionally, the stdout and stderr of the test cases being run are printed to stderr.
 
 ## Compiling
 

@@ -17,34 +17,43 @@ public class TestDriver {
     
     private static PrintStream stderr;
     
-    private static void debugMsg(String message) {
-        if (debug) {
-            stderr.println("[geneseer-test-driver] " + message);
-            stderr.flush();
-        }
+    private ObjectInputStream in;
+    
+    private ObjectOutputStream out;
+    
+    private boolean usePerTestClassLoader;
+    
+    public TestDriver(InputStream stdin, OutputStream stdout, boolean usePerTestClassLoader) throws IOException {
+        this.usePerTestClassLoader = usePerTestClassLoader;
+        this.out = new ObjectOutputStream(stdout);
+        this.in = new ObjectInputStream(stdin);
     }
     
-    private static List<TestResult> runClass(String className) throws ClassNotFoundException, IOException {
+    private List<TestResult> runClass(String className) throws ClassNotFoundException, IOException {
         debugMsg("Running test class " + className);
         return runTestClass(className, null);
     }
     
-    private static List<TestResult> runMethodsReportingIndividually(String className, ObjectInputStream in,
-            ObjectOutputStream out) throws ClassNotFoundException, IOException {
-        
+    private List<TestResult> runMethodsReportingIndividually(String className)
+            throws ClassNotFoundException, IOException {
         debugMsg("Running methods in test class " + className + ", reporting finished tests individually");
         TestFinishReporter testFinishReporter = new TestFinishReporter(in, out);
         return runTestClass(className, testFinishReporter);
     }
     
-    private static List<TestResult> runTestClass(String className, TestFinishReporter testFinishReporter)
+    private List<TestResult> runTestClass(String className, TestFinishReporter testFinishReporter)
             throws ClassNotFoundException, IOException {
         TestResultCollector testResultCollector = new TestResultCollector();
         
         TestClassLoader loader = null;
         try {
-            loader = new TestClassLoader();
-            Class<?> testClass = Class.forName(className, true, loader);
+            Class<?> testClass;
+            if (usePerTestClassLoader) {
+                loader = new TestClassLoader();
+                testClass = Class.forName(className, true, loader);
+            } else {
+                testClass = Class.forName(className);
+            }
             
             JUnitCore junit = new JUnitCore();
             junit.addListener(testResultCollector);
@@ -62,22 +71,17 @@ public class TestDriver {
         return testResultCollector.getTestResults();
     }
     
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
-        ObjectOutputStream out = new ObjectOutputStream(System.out);
-        ObjectInputStream in = new ObjectInputStream(System.in);
-        stderr = System.err;
-        
-        System.setIn(new EmptyInputStream());
-        System.setOut(new PrintStream(new DiscardingOutputStream()));
-        System.setErr(new PrintStream(new DiscardingOutputStream()));
-        
-        debug = args.length > 0 && args[0].equalsIgnoreCase("DEBUG");
+    private void run() throws ClassNotFoundException, IOException {
         if (debug) {
-            debugMsg("Debug output enabled");
-            Runtime.getRuntime().addShutdownHook(new ShutdownHook());
             System.setOut(stderr);
             System.setErr(stderr);
+            Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+            debugMsg("Debug output enabled");
+        } else {
+            System.setOut(new PrintStream(new DiscardingOutputStream()));
+            System.setErr(new PrintStream(new DiscardingOutputStream()));
         }
+        System.setIn(new EmptyInputStream());
         
         try {
             while (true) {
@@ -91,7 +95,7 @@ public class TestDriver {
                     break;
                     
                 case "METHODS":
-                    List<TestResult> resultList = runMethodsReportingIndividually((String) in.readObject(), in, out);
+                    List<TestResult> resultList = runMethodsReportingIndividually((String) in.readObject());
                     out.writeObject("DONE");
                     out.writeObject(resultList);
                     out.flush();
@@ -104,16 +108,46 @@ public class TestDriver {
                     break;
                     
                 default:
-                    debugMsg("Ignoring unknown command");
+                    debugMsg("Unknown command: " + command);
+                    System.exit(1);
                     break;
                 }
             }
+        } catch (ClassCastException e) {
+            throw new IOException("Protocol error", e);
         } catch (EOFException e) {
             debugMsg("stdin closed, stopping...");
-            System.exit(0);
         }
     }
     
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        stderr = System.err;
+        
+        boolean usePerTestClassLoader = true;
+        for (String arg : args) {
+            if ("--debug".equalsIgnoreCase(arg)) {
+                debug = true;
+            } else if ("--no-per-test-classloader".equalsIgnoreCase(arg)) {
+                usePerTestClassLoader = false;
+            } else {
+                stderr.println("Warning: unknown command line option: " + arg);
+            }
+        }
+        
+        TestDriver driver = new TestDriver(System.in, System.out, usePerTestClassLoader);
+        driver.run();
+        
+        // explicitly shut down JVM, since tests may have lingering threads
+        System.exit(0);
+    }
+    
+    static void debugMsg(String message) {
+        if (debug) {
+            stderr.println("[geneseer-test-driver] " + message);
+            stderr.flush();
+        }
+    }
+
     private static final class ShutdownHook extends Thread {
         
         @Override
