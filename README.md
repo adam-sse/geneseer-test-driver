@@ -74,6 +74,10 @@ The test driver can print log debug output to stderr. To enable this, pass `--de
 test driver will then print what it's currently doing to stderr. This is meant for human consumption and should not be
 parsed. Additionally, the stdout and stderr of the test cases being run are printed to stderr.
 
+The debug messages contain a timestamp in the system timezone by default. As the system timezone may be overridden (e.g.
+for test suite stability), a different timezone for debug messages can be specified using `geneseer.logTimeZone` system
+property (for example, via `-Dgeneseer.logTimeZone=Europe/Berlin`).
+
 ## Compiling
 
 This project uses [Maven](https://maven.apache.org/) for dependency management and the build process. To simply build

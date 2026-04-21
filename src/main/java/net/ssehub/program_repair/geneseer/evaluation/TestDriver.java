@@ -7,12 +7,20 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.runner.JUnitCore;
 
 public class TestDriver {
 
+    private static final DateTimeFormatter DEBUG_TIME_FORMATTER
+            = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
+                .withZone(ZoneId.of(System.getProperty("geneseer.logTimeZone", ZoneId.systemDefault().getId())));
+    
     private static boolean debug;
     
     private static PrintStream stderr;
@@ -149,7 +157,10 @@ public class TestDriver {
     
     static void debugMsg(String message) {
         if (debug) {
-            stderr.println("[geneseer-test-driver] " + message);
+            stderr.print("[");
+            stderr.print(DEBUG_TIME_FORMATTER.format(Instant.now()));
+            stderr.print("] [geneseer-test-driver] ");
+            stderr.println(message);
             stderr.flush();
         }
     }
