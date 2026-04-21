@@ -83,6 +83,12 @@ public class TestDriver {
         }
         System.setIn(new EmptyInputStream());
         
+        if (usePerTestClassLoader) {
+            debugMsg("Using separate class loaders per test run");
+        } else {
+            debugMsg("Using same class loader for all test runs");
+        }
+        
         try {
             while (true) {
                 debugMsg("Waiting for command...");
