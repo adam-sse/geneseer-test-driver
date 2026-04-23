@@ -41,12 +41,11 @@ class TestResultCollector extends RunListener {
                 this.executedTests.remove(failure.getDescription());
                 
             } else {
-                testResult.setFailureMessage(failure.getMessage());
                 testResult.setFailureStacktrace(failure.getTrimmedTrace());
             }
             
         } else {
-            throw new RuntimeException("Test failed that wasn't started");
+            throw new IllegalStateException("Test failed that wasn't started");
         }
     }
     

@@ -4,27 +4,19 @@ import java.io.Serializable;
 
 public class TestResult implements Serializable {
 
-    private static final long serialVersionUID = 5281136086896771809L;
+    private static final long serialVersionUID = -4814081494206714329L;
 
     private String testClass;
     
-    private String testMethod;
+    private String implementingClass;
     
-    private String failureMessage;
+    private String testMethod;
     
     private String failureStacktrace;
     
-
-    public TestResult(String testClass, String testMethod) {
-        this.testClass = testClass;
+    TestResult(String implementingClass, String testMethod) {
+        this.implementingClass = implementingClass;
         this.testMethod = testMethod;
-    }
-    
-    public TestResult(String testClass, String testMethod, String failureMessage, String failureStacktrace) {
-        this.testClass = testClass;
-        this.testMethod = testMethod;
-        this.failureMessage = failureMessage;
-        this.failureStacktrace = failureStacktrace;
     }
     
     public boolean isFailure() {
@@ -35,16 +27,16 @@ public class TestResult implements Serializable {
         return testClass;
     }
     
+    void setTestClass(String testClass) {
+        this.testClass = testClass;
+    }
+    
+    public String getImplementingClass() {
+        return implementingClass;
+    }
+    
     public String getTestMethod() {
         return testMethod;
-    }
-    
-    public String getFailureMessage() {
-        return failureMessage;
-    }
-    
-    void setFailureMessage(String failureMessage) {
-        this.failureMessage = failureMessage;
     }
     
     public String getFailureStacktrace() {
@@ -57,7 +49,7 @@ public class TestResult implements Serializable {
     
     @Override
     public String toString() {
-        return testClass + "::" + testMethod;
+        return testClass + "::" + testMethod + "@" + implementingClass;
     }
     
 }

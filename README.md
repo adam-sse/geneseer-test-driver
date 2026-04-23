@@ -46,12 +46,12 @@ Note that you do not need to depend on this project to deserialize the `TestResu
 structurally equivalent class and deserialize into that. This requires:
 
 * A class or record called `TestResult` in the package `net.ssehub.program_repair.geneseer.evaluation`
-* The serial version identifier `private static final long serialVersionUID = 5281136086896771809L`
+* The serial version identifier `private static final long serialVersionUID = -4814081494206714329L`
 * The following attributes, all of type `java.lang.String`
-    * `testClass`
+    * `testClass` (the test class that was executed; always the same as supplied with the command, see above)
+    * `implementingClass` (where the test method is implemented, which may be different from `testClass`)
     * `testMethod`
-    * `failureMessage`
-    * `failureStacktrace`
+    * `failureStacktrace` (`null` if the test is successful)
 
 ## Test class loading
 

@@ -75,8 +75,12 @@ public class TestDriver {
             }
         }
         
-        debugMsg("Got " + testResultCollector.getTestResults().size() + " TestResults");
-        return testResultCollector.getTestResults();
+        List<TestResult> result = testResultCollector.getTestResults();
+        debugMsg("Got " + result.size() + " TestResults");
+        for (TestResult testResult : result) {
+            testResult.setTestClass(className);
+        }
+        return result;
     }
     
     private void run() throws ClassNotFoundException, IOException {
