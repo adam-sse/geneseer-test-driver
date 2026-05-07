@@ -30,6 +30,28 @@ class TestResultCollector extends RunListener {
         this.executedTests.put(description, new TestResult(description.getClassName(), description.getMethodName()));
     }
     
+    private static String escapeInvalidUtf16(String s) {
+        StringBuilder out = new StringBuilder(s.length());
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+
+            if (Character.isHighSurrogate(ch)) {
+                if (i + 1 < s.length() && Character.isLowSurrogate(s.charAt(i + 1))) {
+                    out.append(ch).append(s.charAt(++i));
+                } else {
+                    out.append("\\u").append(String.format("%04X", (int) ch));
+                }
+            } else if (Character.isLowSurrogate(ch)) {
+                out.append("\\u").append(String.format("%04X", (int) ch));
+            } else {
+                out.append(ch);
+            }
+        }
+
+        return out.toString();
+    }
+    
     @Override
     public void testFailure(Failure failure) {
         TestResult testResult = this.executedTests.get(failure.getDescription());
@@ -41,7 +63,7 @@ class TestResultCollector extends RunListener {
                 this.executedTests.remove(failure.getDescription());
                 
             } else {
-                testResult.setFailureStacktrace(failure.getTrimmedTrace());
+                testResult.setFailureStacktrace(escapeInvalidUtf16(failure.getTrimmedTrace()));
             }
             
         } else {
